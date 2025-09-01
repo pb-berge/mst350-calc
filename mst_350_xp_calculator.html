@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MST 350 — XP Tracker & Grade Planner</title>
+  <style>
+    :root{
+      --bg:#0b1020; --panel:#121939; --ink:#e7eaf6; --muted:#9aa3c7; --accent:#6fd3ff; --accent2:#b38cff; --warn:#ffd166; --bad:#ff6b6b; --good:#06d6a0;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, Noto Sans, "Apple Color Emoji","Segoe UI Emoji"; background:linear-gradient(180deg,#0b1020,#0b1020 40%,#0f1630); color:var(--ink);}
+    a{color:var(--accent)}
+    .wrap{max-width:1100px; margin:auto; padding:24px}
+    header{display:flex; gap:16px; align-items:center; margin-bottom:16px}
+    .logo{width:44px; height:44px; border-radius:12px; background:radial-gradient(circle at 35% 30%, var(--accent) 0 38%, transparent 39%), radial-gradient(circle at 60% 65%, var(--accent2) 0 38%, transparent 39%), linear-gradient(135deg, #223 0 40%, #222a 41%); box-shadow: 0 6px 20px #0008, inset 0 0 0 1px #ffffff20}
+    h1{font-size:clamp(20px,3vw,30px); margin:0}
+    .sub{color:var(--muted); font-size:14px}
+    .grid{display:grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap:16px}
+    .card{background:linear-gradient(180deg,#121939,#101735); border:1px solid #ffffff14; border-radius:16px; padding:16px; box-shadow:0 6px 20px #0006}
+    .card h2{font-size:18px; margin:.2rem 0 .6rem}
+    .row{display:flex; align-items:center; gap:12px; margin:10px 0}
+    label{flex:1; color:var(--muted)}
+    input[type="number"], select{width:110px; padding:10px 12px; background:#0d1330; color:var(--ink); border:1px solid #ffffff2a; border-radius:10px; outline:none}
+    input[type="checkbox"]{transform: scale(1.2);}
+    .hint{font-size:12px; color:var(--muted)}
+    .kpi{display:flex; gap:12px; flex-wrap:wrap}
+    .pill{background:#0c1538; border:1px solid #ffffff1f; border-left:4px solid var(--accent2); padding:10px 12px; border-radius:12px; min-width:160px}
+    .pill b{display:block; font-size:22px}
+    .pill small{color:var(--muted)}
+    .bar{height:12px; width:100%; background:#0b1230; border:1px solid #ffffff1c; border-radius:999px; overflow:hidden}
+    .bar > i{display:block; height:100%; background:linear-gradient(90deg, var(--accent), var(--accent2)); width:0%}
+    .warn{color:var(--warn)}
+    .bad{color:var(--bad)}
+    .good{color:var(--good)}
+    details{background:#0c1432; border:1px dashed #ffffff2a; padding:12px; border-radius:12px}
+    .footer{color:#99a1c7; font-size:12px; text-align:center; margin-top:16px}
+    .btn{display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #ffffff22; background:#0e1540; color:var(--ink); text-decoration:none; cursor:pointer}
+    .btn:active{transform:translateY(1px)}
+    .btn.secondary{background:#0c1330}
+    .split{display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center}
+    .deadlines{font-size:12px; color:var(--muted)}
+    .tag{display:inline-block; padding:4px 8px; border-radius:999px; border:1px solid #ffffff22; background:#0c1536; font-size:12px; margin-right:6px}
+    /* Side quest list styles */
+    .sq-toolbar{display:flex; gap:12px; align-items:center; margin-bottom:8px}
+    .sq-item{display:grid; grid-template-columns:auto 1fr auto; gap:8px; align-items:center; padding:8px 10px; border:1px solid #ffffff14; border-radius:10px; background:#0b1330; margin:8px 0}
+    .sq-title{font-weight:600}
+    .sq-meta{font-size:12px; color:var(--muted)}
+    .sq-controls{display:flex; gap:8px; align-items:center}
+
+    /* Report styles */
+    #reportCard{background:#0c1432; border:1px solid #ffffff22; border-radius:16px; padding:20px; width:900px; margin:auto}
+    #reportCard h3{margin:0 0 8px 0}
+    #reportGrid{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+    #reportGrid .box{background:#0b1330; border:1px solid #ffffff22; border-radius:12px; padding:12px}
+    .rrow{display:flex; justify-content:space-between; margin:6px 0}
+    .rrow b{font-variant-numeric:tabular-nums}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1>MST 350 — XP Tracker & Grade Planner</h1>
+        <div class="sub">Track main quests, side quests, badges, and eligibility for the Miniboss and Final Boss. Values auto‑save in your browser.</div>
+      </div>
+      <div style="margin-left:auto; display:flex; gap:8px; flex-wrap:wrap">
+        <button class="btn" id="saveBtn" title="Values auto‑save as you type; use this to force a save.">💾 Save</button>
+        <button class="btn secondary" id="printBtn" title="Print a clean report">🖨️ Print</button>
+        <button class="btn secondary" id="pngBtn" title="Export a PNG report">🖼️ Export PNG</button>
+        <button class="btn secondary" id="resetBtn" title="Clear all inputs">↺ Reset</button>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="kpi">
+        <div class="pill"><small>Total XP</small><b id="totalXP">0</b></div>
+        <div class="pill" style="border-left-color:var(--accent)"><small>XP to A+ (100 XP)</small><b id="toAplus">100</b></div>
+        <div class="pill"><small>From Main Quests</small><b id="fromMain">0</b></div>
+        <div class="pill"><small>From Side Quests + Badges</small><b id="fromSide">0</b></div>
+        <div class="pill"><small>Final Boss XP</small><b id="bossXP">0</b></div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <div class="bar" aria-label="progress to 100 XP"><i id="prog"></i></div>
+      </div>
+      <div class="deadlines">
+        <span class="tag">Units 1–2 cutoff: Nov 14 @ 11:59pm</span>
+        <span class="tag">Last class: Dec 8</span>
+        <span class="tag">Final deadline (work): Dec 10 @ 11:59pm</span>
+        <span class="tag">Final portfolio: Dec 21 @ 11:59pm</span>
+      </div>
+    </section>
+
+    <div class="grid" role="group" aria-label="Main Quest inputs">
+      <section class="card">
+        <h2>Main Quests</h2>
+        <div class="row"><label for="reads">Play/Read Responses (0–12) · 2 XP each</label><input type="number" id="reads" min="0" max="12" step="1"/></div>
+        <div class="row"><label for="miniq">Mini‑Quests (0–6) · 2 XP each</label><input type="number" id="miniq" min="0" max="6" step="1"/></div>
+        <div class="row"><label for="experiments">Experiments attempted (0–6) · 5 XP each</label><input type="number" id="experiments" min="0" max="6" step="1"/></div>
+        <div class="row"><label for="raids">Class Raids completed (0–3) · 2 XP each</label><input type="number" id="raids" min="0" max="3" step="1"/></div>
+        <div class="row split"><label for="miniboss">Miniboss submitted (5 XP)</label><input type="checkbox" id="miniboss"/></div>
+        <div class="row"><label for="boss">Final Boss (12–18 XP; rubric‑graded)</label>
+          <select id="boss">
+            <option value="0">— Not earned yet —</option>
+            <option value="12">12 XP (meets expectations)</option>
+            <option value="15" selected>15 XP (strong)</option>
+            <option value="18">18 XP (exceptional)</option>
+          </select>
+        </div>
+        <p class="hint">Tip: The Final Boss XP only counts if you're eligible (≥4 Experiments, Miniboss submitted, ≤4 absences). This card will tell you if anything is missing.</p>
+      </section>
+
+      <section class="card">
+        <h2>Side Quests & Badges</h2>
+        <div class="row"><label for="sideXP">Other Side Quest XP (not listed below)</label><input type="number" id="sideXP" min="0" step="1"/></div>
+        <div class="row"><label for="collab">Additional Collaboration Badges (manual)</label><input type="number" id="collab" min="0" step="1"/></div>
+        <div class="row"><label for="research">Additional Research Badges (manual)</label><input type="number" id="research" min="0" step="1"/></div>
+        <div class="row"><label for="design">Additional Design Badges (manual)</label><input type="number" id="design" min="0" step="1"/></div>
+        <div class="row"><label for="heroManual">Additional Heroism Badges (manual)</label><input type="number" id="heroManual" min="0" step="1"/></div>
+        <div class="row">
+          <label>Allocate Heroism (3 Heroism → 1 wildcard)</label>
+          <div style="display:flex; gap:8px; align-items:center">
+            <span class="hint" id="heroAvail">0 available</span>
+            <span>🤝</span><input type="number" id="allocC" min="0" step="1" style="width:70px">
+            <span>🔎</span><input type="number" id="allocR" min="0" step="1" style="width:70px">
+            <span>🎨</span><input type="number" id="allocD" min="0" step="1" style="width:70px">
+          </div>
+        </div>
+        <div class="hint" id="sqAutoSummary">Auto from checklist: 0 XP; +0 🤝, +0 🔎, +0 🎨, +0 🦸</div>
+      </section>
+
+      <section class="card">
+        <h2>Eligibility & Attendance</h2>
+        <div class="row"><label for="absences">Total absences</label><input type="number" id="absences" min="0" step="1"/></div>
+        <div id="eligNote" class="hint">We'll check if you meet the Final Boss requirements automatically.</div>
+        <details style="margin-top:8px"><summary>Why eligibility matters</summary>
+          <div class="hint">To count Final Boss XP you must: submit ≥4 Experiments, submit the Miniboss, and have ≤4 absences (or meet with the instructor). If not eligible, your selected Final Boss XP doesn't count yet.</div>
+        </details>
+      </section>
+
+      <section class="card">
+        <h2>Planner</h2>
+        <div class="row"><label for="target">Target XP (default 100 for A+)</label><input type="number" id="target" min="1" value="100"/></div>
+        <div class="row"><label for="notes">Notes</label></div>
+        <textarea id="notes" rows="6" style="width:100%; resize:vertical; background:#0d1330; color:#e7eaf6; border:1px solid #ffffff2a; border-radius:10px; padding:10px"></textarea>
+        <p class="hint">Use notes to plan your next Side Quests or Experiments.</p>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>Side Quest Checklist</h2>
+      <div class="sq-toolbar">
+        <label style="flex:0 0 auto">Unit Filter</label>
+        <select id="unitFilter"></select>
+        <button class="btn secondary" id="reloadSQ">🔄 Reload Side Quests</button>
+      </div>
+      <div class="hint">This list loads from a separate file managed by your instructor. You'll only see quests for the current phase. Variable‑XP quests include a field; repeatable quests have a counter.</div>
+      <div id="sqList"></div>
+    </section>
+
+    <section class="card" id="advice">
+      <h2>Advisor</h2>
+      <div id="tips" class="hint"></div>
+    </section>
+
+    <!-- Printable / exportable report template (hidden) -->
+    <div id="reportCard" style="display:none">
+      <h3>📘 MST 350 XP Report</h3>
+      <div class="hint" id="rSub">Generated</div>
+      <div id="reportGrid">
+        <div class="box">
+          <div class="rrow"><span>Total XP</span><b id="rTotal">0</b></div>
+          <div class="rrow"><span>Main Quest XP</span><b id="rMain">0</b></div>
+          <div class="rrow"><span>Side Quests + Badge Sets XP</span><b id="rSide">0</b></div>
+          <div class="rrow"><span>Final Boss (counting)</span><b id="rBoss">0</b></div>
+          <div class="rrow"><span>Eligibility</span><b id="rElig">—</b></div>
+        </div>
+        <div class="box">
+          <div class="rrow"><span>Badges: 🤝</span><b id="rB1">0</b></div>
+          <div class="rrow"><span>Badges: 🔎</span><b id="rB2">0</b></div>
+          <div class="rrow"><span>Badges: 🎨</span><b id="rB3">0</b></div>
+          <div class="rrow"><span>Heroism 🦸</span><b id="rBH">0</b></div>
+          <div class="rrow"><span>Heroism wildcards → 🤝/🔎/🎨</span><b id="rHW">0/0/0</b></div>
+          <div class="rrow"><span>Badge Set Bonus XP</span><b id="rSet">0</b></div>
+        </div>
+      </div>
+      <div class="box" style="margin-top:12px">
+        <div style="font-weight:600; margin-bottom:6px">Checked Side Quests</div>
+        <div id="rList" class="hint"></div>
+      </div>
+    </div>
+
+    <div class="footer">This unofficial calculator is for planning only. Always defer to Canvas for authoritative due dates, rubrics, and grades. © You got this.</div>
+  </div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const inputs = [
+      "reads","miniq","experiments","raids","miniboss","boss",
+      "sideXP","collab","research","design","heroManual",
+      "allocC","allocR","allocD",
+      "absences","target","notes"
+    ];
+
+    // --- Side Quests source ---
+    // Place a JSON file named sidequests.json next to this HTML (same origin).
+    // Schema: [ { id, unit, title, baseXP, variableXP, repeatable, optDesign, badges: { collab, research, design, hero } } ]
+    const SQ_URL = 'sidequests.json';
+    let SQ_CATALOG = []; // populated at runtime
+
+    // Persisted state for side quest selections
+    // id -> {done:boolean, varXP:number, optDesign:boolean, count:number}
+    let sqState = {};
+
+    // Runtime report cache
+    let last = {};
+
+    // Load / Save
+    function load(){
+      const raw = localStorage.getItem("mst350_xp_state");
+      if(raw){
+        try{ const s = JSON.parse(raw);
+          inputs.forEach(k=>{ if(s[k]!==undefined){ if($(k).type==="checkbox") $(k).checked=!!s[k]; else $(k).value=s[k]; }});
+        }catch(e){console.warn(e)}
+      }
+      const rs = localStorage.getItem("mst350_xp_sq");
+      if(rs){ try{ sqState = JSON.parse(rs) || {}; }catch(e){ sqState = {}; } }
+      const uf = localStorage.getItem("mst350_xp_unitFilter");
+      if(uf) $("unitFilter").value = uf;
+    }
+    function save(){
+      const s={};
+      inputs.forEach(k=>{ s[k] = ($(k).type==="checkbox") ? $(k).checked : $(k).value; });
+      localStorage.setItem("mst350_xp_state", JSON.stringify(s));
+      localStorage.setItem("mst350_xp_sq", JSON.stringify(sqState));
+      localStorage.setItem("mst350_xp_unitFilter", $("unitFilter").value || 'All');
+    }
+
+    // Clamp helpers
+    function clamp(n,min,max){ n = Number(n||0); if(min!==undefined && n<min) n=min; if(max!==undefined && n>max) n=max; return n; }
+    function int(n){ return Math.floor(Number(n||0)); }
+
+    async function loadSQCatalog(showToast){
+      try{
+        const res = await fetch(SQ_URL, {cache:'no-store'});
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        const data = await res.json();
+        if(!Array.isArray(data)) throw new Error('Invalid JSON shape');
+        SQ_CATALOG = data;
+        localStorage.setItem('mst350_xp_sq_catalog', JSON.stringify(SQ_CATALOG));
+      }catch(err){
+        const cached = localStorage.getItem('mst350_xp_sq_catalog');
+        if(cached){ SQ_CATALOG = JSON.parse(cached); }
+        else { SQ_CATALOG = []; }
+        if(showToast) alert('Could not load sidequests.json; using cached/empty list.');
+      }
+      renderUnitFilter();
+      renderSQ();
+      compute();
+    }
+
+    function renderUnitFilter(){
+      const sel = $("unitFilter"); sel.innerHTML = "";
+      const units = Array.from(new Set(["All", ...SQ_CATALOG.map(x=>x.unit||'')]))
+        .filter(Boolean);
+      if(!units.includes('All')) units.unshift('All');
+      units.forEach(u=>{ const o=document.createElement("option"); o.value=u; o.textContent=u; sel.appendChild(o); });
+      sel.value = localStorage.getItem("mst350_xp_unitFilter") || "All";
+      sel.addEventListener("change", ()=>{ save(); renderSQ(); });
+    }
+
+    function renderSQ(){
+      const box = $("sqList"); box.innerHTML = "";
+      const unitSel = $("unitFilter").value || 'All';
+      SQ_CATALOG.filter(it=> unitSel==='All' || it.unit===unitSel).forEach(item=>{
+        const st = sqState[item.id] || (sqState[item.id] = {done:false, varXP:item.variableXP?0:undefined, optDesign:false, count:0});
+        const row = document.createElement("div"); row.className = "sq-item";
+
+        const cb = document.createElement("input"); cb.type="checkbox"; cb.checked = !!st.done; cb.disabled = !!item.repeatable;
+        cb.addEventListener("input", ()=>{ st.done = cb.checked; compute(); });
+        row.appendChild(cb);
+
+        const meta = document.createElement("div");
+        const ttl = document.createElement("div"); ttl.className="sq-title"; ttl.textContent = `${item.title} ${item.unit?`(${item.unit})`:''}`;
+        const info = document.createElement("div"); info.className="sq-meta";
+        let parts = [];
+        if(item.baseXP) parts.push(`${item.baseXP} XP`);
+        if(item.variableXP) parts.push(`variable XP`);
+        const b = item.badges||{}; const badgeBits = [];
+        if(b.collab) badgeBits.push(`+${b.collab} 🤝`);
+        if(b.research) badgeBits.push(`+${b.research} 🔎`);
+        if(b.design) badgeBits.push(`+${b.design} 🎨`);
+        if(b.hero) badgeBits.push(`+${b.hero} 🦸`);
+        if(badgeBits.length) parts.push(badgeBits.join(" · "));
+        if(item.repeatable) parts.push("repeatable");
+        info.textContent = parts.join(" | ");
+        meta.appendChild(ttl); meta.appendChild(info);
+        row.appendChild(meta);
+
+        const controls = document.createElement("div"); controls.className="sq-controls";
+        if(item.variableXP){
+          const lbl = document.createElement("label"); lbl.textContent = "XP:"; lbl.style.color="var(--muted)";
+          const varInp = document.createElement("input"); varInp.type="number"; varInp.min="0"; varInp.step="1"; varInp.style.width="90px"; varInp.value = st.varXP || 0;
+          varInp.addEventListener("input", ()=>{ st.varXP = clamp(varInp.value,0,999); st.done = (st.varXP>0); compute(); });
+          controls.appendChild(lbl); controls.appendChild(varInp);
+        }
+        if(item.repeatable){
+          const lbl2 = document.createElement("label"); lbl2.textContent = "Times:"; lbl2.style.color="var(--muted)";
+          const cnt = document.createElement("input"); cnt.type="number"; cnt.min="0"; cnt.step="1"; cnt.style.width='90px'; cnt.value = st.count || 0;
+          cnt.addEventListener("input", ()=>{ st.count = clamp(cnt.value,0,99); st.done = (st.count>0); compute(); });
+          controls.appendChild(lbl2); controls.appendChild(cnt);
+        }
+        if(item.optDesign){
+          const opt = document.createElement("label"); opt.style.display="flex"; opt.style.alignItems="center"; opt.style.gap="6px";
+          const optCb = document.createElement("input"); optCb.type="checkbox"; optCb.checked = !!st.optDesign;
+          optCb.addEventListener("input", ()=>{ st.optDesign = optCb.checked; st.done = true; compute(); });
+          opt.appendChild(optCb);
+          const txt = document.createElement("span"); txt.textContent = "Include optional 🎨 badge";
+          opt.appendChild(txt);
+          controls.appendChild(opt);
+        }
+        row.appendChild(controls);
+        box.appendChild(row);
+      });
+    }
+
+    function compute(){
+      // Read values (clamped to syllabus limits)
+      const reads = clamp($("reads").value,0,12);
+      const miniq = clamp($("miniq").value,0,6);
+      const exps  = clamp($("experiments").value,0,6);
+      const raids = clamp($("raids").value,0,3);
+      const minib = $("miniboss").checked ? 1 : 0;
+      const bossSel = int($("boss").value); // 0 or 12/15/18
+      const sideManual = clamp($("sideXP").value,0,9999);
+      const collabManual = clamp($("collab").value,0,99);
+      const researchManual = clamp($("research").value,0,99);
+      const designManual = clamp($("design").value,0,99);
+      const heroManual = clamp($("heroManual").value,0,99);
+      let allocC = clamp($("allocC").value,0,99);
+      let allocR = clamp($("allocR").value,0,99);
+      let allocD = clamp($("allocD").value,0,99);
+      const abs = clamp($("absences").value,0,99);
+      const target = clamp($("target").value,1,9999);
+
+      // Main quest XP
+      const xpReads = reads * 2;      // 12 × 2
+      const xpMini  = miniq * 2;      // 6 × 2
+      const xpExp   = exps  * 5;      // 6 × 5
+      const xpRaids = raids * 2;      // 3 × 2
+      const xpMiniB = minib * 5;      // 1 × 5
+
+      // Eligibility for Final Boss XP
+      const eligible = (exps >= 4) && (minib === 1) && (abs <= 4);
+      const xpBoss = eligible ? bossSel : 0;
+
+      // Side Quest auto totals (from checklist)
+      let sqXP = 0; let autoCollab = 0, autoResearch = 0, autoDesign = 0, autoHero = 0;
+      let rChecked = [];
+      SQ_CATALOG.forEach(item=>{
+        const st = sqState[item.id] || {};
+        const b = (item.badges||{});
+        if(item.repeatable){
+          const c = clamp(st.count||0,0,99);
+          if(c>0){
+            sqXP += (item.baseXP||0) * c;
+            autoCollab += (b.collab||0) * c;
+            autoResearch += (b.research||0) * c;
+            autoDesign += (b.design||0) * c;
+            autoHero += (b.hero||0) * c;
+            rChecked.push(`${item.title} ×${c}`);
+          }
+        } else if(st.done){
+          sqXP += (item.variableXP ? (clamp(st.varXP,0,999)||0) : (item.baseXP||0));
+          autoCollab += (b.collab||0);
+          autoResearch += (b.research||0);
+          autoDesign += (b.design||0);
+          autoHero += (b.hero||0);
+          if(item.optDesign && st.optDesign) autoDesign += 1;
+          rChecked.push(item.title + (item.variableXP?` (${st.varXP||0} XP)`:''));
+        }
+      });
+
+      // Heroism wildcards: every 3 heroism = 1 wildcard allocated to 🤝/🔎/🎨
+      const heroTotal = heroManual + autoHero;
+      const wildcards = Math.floor(heroTotal / 3);
+      if(allocC > wildcards) allocC = wildcards;
+      let rem = wildcards - allocC;
+      if(allocR > rem) allocR = rem;
+      rem = rem - allocR;
+      if(allocD > rem) allocD = rem;
+      $("allocC").value = allocC; $("allocR").value = allocR; $("allocD").value = allocD;
+      $("heroAvail").textContent = `${wildcards} available`;
+
+      $("sqAutoSummary").textContent = `Auto from checklist: ${sqXP} XP; +${autoCollab} 🤝, +${autoResearch} 🔎, +${autoDesign} 🎨, +${autoHero} 🦸`;
+
+      // Badge set bonuses use total badges (auto + manual + heroism allocation)
+      const totalCollab = collabManual + autoCollab + allocC;
+      const totalResearch = researchManual + autoResearch + allocR;
+      const totalDesign = designManual + autoDesign + allocD;
+
+      const setsCollab = Math.floor(totalCollab / 3); // 3 → +3 XP
+      const setsResearch = Math.floor(totalResearch / 2); // 2 → +3 XP
+      const setsDesign = Math.floor(totalDesign / 2); // 2 → +3 XP
+      const xpBadges = (setsCollab + setsResearch + setsDesign) * 3;
+
+      const main = xpReads + xpMini + xpExp + xpRaids + xpMiniB + xpBoss;
+      const fromSide = sideManual + sqXP + xpBadges;
+      const total = main + fromSide;
+
+      // UI
+      $("reads").value=reads; $("miniq").value=miniq; $("experiments").value=exps; $("raids").value=raids; $("sideXP").value=sideManual; $("collab").value=collabManual; $("research").value=researchManual; $("design").value=designManual; $("heroManual").value=heroManual; $("absences").value=abs; $("target").value=target;
+      $("totalXP").textContent = total;
+      $("fromMain").textContent = main;
+      $("fromSide").textContent = fromSide;
+      $("bossXP").textContent = xpBoss + (eligible?"":" (0; not eligible yet)");
+      const remain = Math.max(0, target - total);
+      $("toAplus").textContent = remain;
+
+      const pct = Math.max(0, Math.min(100, (total/target)*100));
+      $("prog").style.width = pct + "%";
+
+      let note = "";
+      if(!eligible){
+        const parts=[];
+        if(exps < 4) parts.push(`need ${4-exps} more Experiment(s)`);
+        if(minib===0) parts.push("submit the Miniboss");
+        if(abs > 4) parts.push("reduce absences to ≤ 4 or meet with the instructor");
+        note = `⚠️ Final Boss not counting yet — ${parts.join(", ")}.`;
+        $("eligNote").className = "hint warn";
+      } else { note = "✅ Final Boss eligible."; $("eligNote").className = "hint good"; }
+      $("eligNote").textContent = note;
+
+      const tips=[];
+      const baselineMax = (12*2)+(6*2)+(6*5)+(3*2)+5+15; // 92
+      tips.push(`With all Main Quests and a strong Final Boss (15 XP), you reach about 92 XP. Side Quests and badge sets bridge the rest.`);
+      if(remain>0){
+        const bestBadge = 3; // per set
+        const neededSets = Math.ceil(remain / bestBadge);
+        tips.push(`You are ${remain} XP from your target. For example: ${neededSets} badge set(s), or any mix of Side Quests worth ${remain} XP.`);
+      } else {
+        tips.push("Nice! You've met or exceeded your target. Consider banking extra Side Quests as a buffer.");
+      }
+      if(abs>4){ tips.push("Attendance is currently blocking Final Boss XP. If there are extenuating circumstances, meet with the instructor."); }
+      if(!eligible && bossSel>0){ tips.push("You've selected Final Boss XP, but it won't count until eligibility is met."); }
+      if((sideManual+sqXP)===0){ tips.push("Scan the Side Quest board for quick wins; many offer 2–3 XP plus badges."); }
+      $("tips").innerHTML = tips.map(t=>`<div>• ${t}</div>`).join("");
+
+      // Report fill
+      $("rSub").textContent = new Date().toLocaleString();
+      $("rTotal").textContent = total;
+      $("rMain").textContent = main;
+      $("rSide").textContent = fromSide;
+      $("rBoss").textContent = xpBoss;
+      $("rElig").textContent = eligible ? 'Eligible' : 'Not yet';
+      $("rB1").textContent = totalCollab;
+      $("rB2").textContent = totalResearch;
+      $("rB3").textContent = totalDesign;
+      $("rBH").textContent = heroTotal;
+      $("rHW").textContent = `${allocC}/${allocR}/${allocD}`;
+      $("rSet").textContent = xpBadges;
+      $("rList").innerHTML = rChecked.length ? rChecked.map(x=>`<div>• ${x}</div>`).join("") : '<em>No side quests checked</em>';
+
+      last = { total, main, fromSide, xpBoss, eligible, totalCollab, totalResearch, totalDesign, heroTotal, allocC, allocR, allocD, xpBadges, rChecked };
+
+      save();
+    }
+
+    function exportPNG(){
+      // Draw a stylized report to a canvas (no cross-origin issues)
+      const W = 1200, P = 32; const line = 36;
+      const canvas = document.createElement('canvas');
+      canvas.width = W; canvas.height = 880 + Math.max(0, (last.rChecked?.length||0) * 22);
+      const ctx = canvas.getContext('2d');
+
+      const g = ctx.createLinearGradient(0,0,0,canvas.height); g.addColorStop(0,'#0b1020'); g.addColorStop(1,'#0f1630');
+      ctx.fillStyle = g; ctx.fillRect(0,0,canvas.width,canvas.height);
+
+      ctx.fillStyle = '#e7eaf6'; ctx.font = '700 32px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+      ctx.fillText('MST 350 — XP Report', P, P+8);
+      ctx.font = '14px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+      ctx.fillStyle = '#9aa3c7'; ctx.fillText(new Date().toLocaleString(), P, P+8+24);
+
+      function card(x,y,w,h){ ctx.fillStyle = '#0c1432'; ctx.strokeStyle = '#4151a9'; ctx.lineWidth = 1; ctx.fillRect(x,y,w,h); ctx.strokeRect(x+0.5,y+0.5,w-1,h-1); }
+      function row(lbl,val,x,y){ ctx.fillStyle = '#9aa3c7'; ctx.font='16px system-ui, -apple-system, Segoe UI, Roboto, Arial'; ctx.fillText(lbl,x,y); ctx.fillStyle='#e7eaf6'; ctx.font='600 18px system-ui, -apple-system, Segoe UI, Roboto, Arial'; ctx.fillText(String(val), x+420, y); }
+
+      const Lx=P, Ly=P+60, Lw=W/2-P*1.5, Lh=260; card(Lx,Ly,Lw,Lh);
+      row('Total XP', last.total, Lx+16, Ly+40);
+      row('Main Quest XP', last.main, Lx+16, Ly+40+line);
+      row('Side Quests + Badge Sets XP', last.fromSide, Lx+16, Ly+40+line*2);
+      row('Final Boss (counting)', last.xpBoss, Lx+16, Ly+40+line*3);
+      row('Eligibility', last.eligible?'Eligible':'Not yet', Lx+16, Ly+40+line*4);
+
+      const Rx=Lx+Lw+P, Ry=Ly, Rw=W - Rx - P, Rh=Lh; card(Rx,Ry,Rw,Rh);
+      row('Badges 🤝', last.totalCollab, Rx+16, Ry+40);
+      row('Badges 🔎', last.totalResearch, Rx+16, Ry+40+line);
+      row('Badges 🎨', last.totalDesign, Rx+16, Ry+40+line*2);
+      row('Heroism 🦸', last.heroTotal, Rx+16, Ry+40+line*3);
+      row('Heroism wildcards → 🤝/🔎/🎨', `${last.allocC}/${last.allocR}/${last.allocD}`, Rx+16, Ry+40+line*4);
+      row('Badge Set Bonus XP', last.xpBadges, Rx+16, Ry+40+line*5);
+
+      const Bx=P, By=Ly+Lh+P, Bw=W-P*2, Bh=canvas.height-By-P; card(Bx,By,Bw,Bh);
+      ctx.fillStyle='#e7eaf6'; ctx.font='600 18px system-ui, -apple-system, Segoe UI, Roboto, Arial'; ctx.fillText('Checked Side Quests', Bx+16, By+32);
+      ctx.fillStyle='#9aa3c7'; ctx.font='16px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+      const items = last.rChecked||[]; let y = By+60; items.forEach(it=>{ ctx.fillText('• '+it, Bx+16, y); y+=22; });
+      if(items.length===0){ ctx.fillText('No side quests checked', Bx+16, y); }
+
+      canvas.toBlob(b=>{ const dl = document.createElement('a'); dl.href = URL.createObjectURL(b); dl.download = 'mst350-xp-report.png'; dl.click(); }, 'image/png');
+    }
+
+    function printReport(){
+      const node = $("reportCard");
+      node.style.display = 'block';
+      const w = window.open('', 'report');
+      w.document.write(`<!doctype html><html><head><meta charset='utf-8'><title>MST 350 Report</title>`+
+        `<style>body{background:#0b1020;color:#e7eaf6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;padding:20px}`+
+        `#reportCard{display:block;margin:auto}</style></head><body>${node.outerHTML}</body></html>`);
+      w.document.close(); w.focus(); w.print(); w.close();
+      node.style.display = 'none';
+    }
+
+    // Events
+    inputs.forEach(k=> $(k).addEventListener("input", compute));
+    $("saveBtn").addEventListener("click", save);
+    $("resetBtn").addEventListener("click", ()=>{ localStorage.removeItem("mst350_xp_state"); localStorage.removeItem("mst350_xp_sq"); localStorage.removeItem("mst350_xp_unitFilter"); inputs.forEach(k=>{ if($(k).type==="checkbox") $(k).checked=false; else $(k).value=""; }); $("boss").value="15"; $("target").value=100; sqState={}; renderUnitFilter(); renderSQ(); compute(); });
+    $("pngBtn").addEventListener("click", exportPNG);
+    $("printBtn").addEventListener("click", printReport);
+    $("reloadSQ").addEventListener("click", ()=> loadSQCatalog(true));
+
+    load();
+    loadSQCatalog();
+    compute();
+  </script>
+</body>
+</html>
