@@ -2,22 +2,12 @@
   {
     "id": "horizons",
     "unit": "Eternal",
-    "title": "🎙️ PLAYFUL HORIZONS",
-    "baseXP": 2,
+    "title": "HEROISM",
+    "baseXP": 0,
     "variableXP": false,
     "repeatable": true,
     "optDesign": false,
-    "badges": { "collab": 0, "research": 1, "design": 0, "hero": 0 }
-  },
-  {
-    "id": "pact",
-    "unit": "Eternal",
-    "title": "🙏 Pact Tactics",
-    "baseXP": 2,
-    "variableXP": false,
-    "repeatable": false,
-    "optDesign": true,
-    "badges": { "collab": 1, "research": 0, "design": 1, "hero": 0 }
+    "badges": { "collab": 0, "research": 0, "design": 0, "hero": 1 }
   }
-  // ...add new quests as the course progresses
 ]
+
