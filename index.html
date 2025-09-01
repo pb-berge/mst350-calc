@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MST 350 — XP Tracker & Grade Planner</title>
+  <title>MST 350 — XP Tracker \& Grade Planner</title>
   <style>
     :root{
       --bg:#0b1020; --panel:#121939; --ink:#e7eaf6; --muted:#9aa3c7; --accent:#6fd3ff; --accent2:#b38cff; --warn:#ffd166; --bad:#ff6b6b; --good:#06d6a0;
@@ -13,7 +13,7 @@
     a{color:var(--accent)}
     .wrap{max-width:1100px; margin:auto; padding:24px}
     header{display:flex; gap:16px; align-items:center; margin-bottom:16px}
-    .logo{width:44px; height:44px; border-radius:12px; background:radial-gradient(circle at 35% 30%, var(--accent) 0 38%, transparent 39%), radial-gradient(circle at 60% 65%, var(--accent2) 0 38%, transparent 39%), linear-gradient(135deg, #223 0 40%, #222a 41%); box-shadow: 0 6px 20px #0008, inset 0 0 0 1px #ffffff20}
+    .logo{width:44px; height:44px; border-radius:12px; background:radial-gradient(circle at 35% 20%, var(--accent) 0 45%, transparent 39%), radial-gradient(circle at 60% 65%, var(--accent2) 0 38%, transparent 39%), linear-gradient(135deg, #223 0 40%, #222a 41%); box-shadow: 0 6px 20px #0008, inset 0 0 0 1px #ffffff20}
     h1{font-size:clamp(20px,3vw,30px); margin:0}
     .sub{color:var(--muted); font-size:14px}
     .grid{display:grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap:16px}
@@ -60,10 +60,10 @@
 <body>
   <div class="wrap">
     <header>
-      <div class="logo" aria-hidden="true"></div>
+      <img src = "https://persephone.blue/wp-content/uploads/2024/09/Class-Banner-2-scaled.jpg" width=20%/>
       <div>
-        <h1>MST 350 — XP Tracker & Grade Planner</h1>
-        <div class="sub">Track main quests, side quests, badges, and eligibility for the Miniboss and Final Boss. Values auto‑save in your browser.</div>
+        <h1>MST 350 — XP Tracker / Planner</h1>
+        <div class="sub">Track main quests, side quests, badges, and XP as you plan your adventure through Understanding Videogames! Values auto‑save in your browser.</div>
       </div>
       <div style="margin-left:auto; display:flex; gap:8px; flex-wrap:wrap">
         <button class="btn" id="saveBtn" title="Values auto‑save as you type; use this to force a save.">💾 Save</button>
@@ -85,9 +85,9 @@
         <div class="bar" aria-label="progress to 100 XP"><i id="prog"></i></div>
       </div>
       <div class="deadlines">
-        <span class="tag">Units 1–2 cutoff: Nov 14 @ 11:59pm</span>
+        <span class="tag">Units 1–2 materials cutoff: Nov 14 @ 11:59pm</span>
         <span class="tag">Last class: Dec 8</span>
-        <span class="tag">Final deadline (work): Dec 10 @ 11:59pm</span>
+        <span class="tag">Final deadline (materials): Dec 10 @ 11:59pm</span>
         <span class="tag">Final portfolio: Dec 21 @ 11:59pm</span>
       </div>
     </section>
@@ -95,12 +95,22 @@
     <div class="grid" role="group" aria-label="Main Quest inputs">
       <section class="card">
         <h2>Main Quests</h2>
-        <div class="row"><label for="reads">Play/Read Responses (0–12) · 2 XP each</label><input type="number" id="reads" min="0" max="12" step="1"/></div>
-        <div class="row"><label for="miniq">Mini‑Quests (0–6) · 2 XP each</label><input type="number" id="miniq" min="0" max="6" step="1"/></div>
-        <div class="row"><label for="experiments">Experiments attempted (0–6) · 5 XP each</label><input type="number" id="experiments" min="0" max="6" step="1"/></div>
-        <div class="row"><label for="raids">Class Raids completed (0–3) · 2 XP each</label><input type="number" id="raids" min="0" max="3" step="1"/></div>
-        <div class="row split"><label for="miniboss">Miniboss submitted (5 XP)</label><input type="checkbox" id="miniboss"/></div>
-        <div class="row"><label for="boss">Final Boss (12–18 XP; rubric‑graded)</label>
+        <div class="row"><label for="reads"><strong>Play/Read Responses <br>
+        </strong>(12 Available) · 2 XP each</label>
+        <input type="number" id="reads" min="0" max="12" step="1"/></div>
+        <div class="row"><label for="miniq"><strong>Mini‑Quests</strong> <br>
+          (6 Available) · 2 XP each</label>
+        <input type="number" id="miniq" min="0" max="6" step="1"/></div>
+        <div class="row"><label for="experiments"><strong>Experiments</strong> <br>
+(6 Available) · 5 XP each</label>
+        <input type="number" id="experiments" min="0" max="6" step="1"/></div>
+        <div class="row"><label for="raids">Unit Speedruns<br>
+          (3 Available) · 2 XP each</label>
+        <input type="number" id="raids" min="0" max="3" step="1"/></div>
+        <div class="row split"><label for="miniboss"><strong>Miniboss</strong> completed (5 XP)</label>
+        <input type="checkbox" id="miniboss"/></div>
+        <div class="row"><label for="boss"><strong>Final Boss</strong> <br>
+          (12–18 XP; rubric‑graded)</label>
           <select id="boss">
             <option value="0">— Not earned yet —</option>
             <option value="12">12 XP (meets expectations)</option>
@@ -118,14 +128,15 @@
         <div class="row"><label for="research">Additional Research Badges (manual)</label><input type="number" id="research" min="0" step="1"/></div>
         <div class="row"><label for="design">Additional Design Badges (manual)</label><input type="number" id="design" min="0" step="1"/></div>
         <div class="row"><label for="heroManual">Additional Heroism Badges (manual)</label><input type="number" id="heroManual" min="0" step="1"/></div>
-        <div class="row">
-          <label>Allocate Heroism (3 Heroism → 1 wildcard)</label>
+        <div class="row"></div>
+          <label><strong>Allocate Heroism</strong> <span class="hint">(3 Heroism → 1 wildcard)</span></label>
           <div style="display:flex; gap:8px; align-items:center">
-            <span class="hint" id="heroAvail">0 available</span>
+			  <span class="hint" id="heroAvail">0 available</span>
+		  </div>
+		  <div style="display:flex; gap:8px; align-items:center">
             <span>🤝</span><input type="number" id="allocC" min="0" step="1" style="width:70px">
             <span>🔎</span><input type="number" id="allocR" min="0" step="1" style="width:70px">
             <span>🎨</span><input type="number" id="allocD" min="0" step="1" style="width:70px">
-          </div>
         </div>
         <div class="hint" id="sqAutoSummary">Auto from checklist: 0 XP; +0 🤝, +0 🔎, +0 🎨, +0 🦸</div>
       </section>
@@ -133,9 +144,9 @@
       <section class="card">
         <h2>Eligibility & Attendance</h2>
         <div class="row"><label for="absences">Total absences</label><input type="number" id="absences" min="0" step="1"/></div>
-        <div id="eligNote" class="hint">We'll check if you meet the Final Boss requirements automatically.</div>
-        <details style="margin-top:8px"><summary>Why eligibility matters</summary>
-          <div class="hint">To count Final Boss XP you must: submit ≥4 Experiments, submit the Miniboss, and have ≤4 absences (or meet with the instructor). If not eligible, your selected Final Boss XP doesn't count yet.</div>
+        <div id="eligNote" class="hint">This planner will check if you meet the Final Boss requirements automatically!</div>
+        <details style="margin-top:8px"><summary>Elligiblity for the Final Boss</summary>
+          <div class="hint">The Final Boss can only be submitted if you have completed ≥4 Experiments and the Miniboss, and you have ≤4 absences (or meet with me). If not eligible, your selected Final Boss XP can't count yet.</div>
         </details>
       </section>
 
@@ -155,13 +166,14 @@
         <select id="unitFilter"></select>
         <button class="btn secondary" id="reloadSQ">🔄 Reload Side Quests</button>
       </div>
-      <div class="hint">This list loads from a separate file managed by your instructor. You'll only see quests for the current phase. Variable‑XP quests include a field; repeatable quests have a counter.</div>
+      <div class="hint">This list loads from a separate file managed by PB! You'll only see quests that have currently been released. If something isn't showing up, <a href = "mailto:pb.berge@ualberta.ca">message PB</a>!</div>
       <div id="sqList"></div>
     </section>
 
     <section class="card" id="advice">
-      <h2>Advisor</h2>
-      <div id="tips" class="hint"></div>
+      <h2>Helpful Tips</h2>
+      <div id="tips" class="hint">
+		</div>
     </section>
 
     <!-- Printable / exportable report template (hidden) -->
@@ -206,7 +218,7 @@
     // --- Side Quests source ---
     // Place a JSON file named sidequests.json next to this HTML (same origin).
     // Schema: [ { id, unit, title, baseXP, variableXP, repeatable, optDesign, badges: { collab, research, design, hero } } ]
-    const SQ_URL = 'sidequests.json';
+    const SQ_URL = 'https://raw.githubusercontent.com/pb-berge/mst350-calc/refs/heads/main/sidequests.json';
     let SQ_CATALOG = []; // populated at runtime
 
     // Persisted state for side quest selections
@@ -438,13 +450,13 @@
       if(remain>0){
         const bestBadge = 3; // per set
         const neededSets = Math.ceil(remain / bestBadge);
-        tips.push(`You are ${remain} XP from your target. For example: ${neededSets} badge set(s), or any mix of Side Quests worth ${remain} XP.`);
+        tips.push(`You are ${remain} XP from your target. Consider completing some badge set(s), or any mix of Side Quests worth ${remain} XP.`);
       } else {
-        tips.push("Nice! You've met or exceeded your target. Consider banking extra Side Quests as a buffer.");
+        tips.push("Hooray! You've met or exceeded your target! If you want an extra buffer for hte Final, or you're going for the class High Score, consider banking extra Side Quests!");
       }
-      if(abs>4){ tips.push("Attendance is currently blocking Final Boss XP. If there are extenuating circumstances, meet with the instructor."); }
-      if(!eligible && bossSel>0){ tips.push("You've selected Final Boss XP, but it won't count until eligibility is met."); }
-      if((sideManual+sqXP)===0){ tips.push("Scan the Side Quest board for quick wins; many offer 2–3 XP plus badges."); }
+      if(abs>4){ tips.push("Heads-up! You've used all four invisibility potions. Don't forget to schedule a meeting with PB if you haven't already!"); }
+      if(!eligible && bossSel>0){ tips.push("You've selected Final Boss XP, but it won't count until you meet the prerequisites!"); }
+      if((sideManual+sqXP)===0){ tips.push("Scan the Side Quest board for quick wins! Strategizing with your party members can be an easy way to get 2–3 XP, badges, and momentum!"); }
       $("tips").innerHTML = tips.map(t=>`<div>• ${t}</div>`).join("");
 
       // Report fill
