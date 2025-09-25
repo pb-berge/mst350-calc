@@ -28,5 +28,37 @@
     "repeatable": false,
     "optDesign": false,
     "badges": { "collab": 1, "research": 0, "design": 0, "hero": 0 }
+  },
+  {
+    "id": "misadventures",
+    "unit": "Unit 1",
+    "title": "🔖 Text (Mis)adventures",
+    "baseXP": 2,
+    "variableXP": false,
+    "repeatable": false,
+    "optDesign": false,
+    "badges": { "collab": 0, "research": 1, "design": 0, "hero": 0 }
+  },
+  {
+    "id": "loop",
+    "unit": "Unit 1",
+    "title": "🌪️ Stuck in the Loop",
+    "baseXP": 3,
+    "variableXP": false,
+    "repeatable": false,
+    "optDesign": false,
+    "badges": { "collab": 0, "research": 1, "design": 0, "hero": 0 }
+  },
+  {
+    "id": "knot",
+    "unit": "Unit 1",
+    "title": "🪢 Knot to Brag!",
+    "baseXP": 2,
+    "variableXP": true,
+    "repeatable": false,
+    "optDesign": true,
+    "badges": { "collab": 0, "research": 0, "design": 1, "hero": 0 }
   }
+
 ]
+
