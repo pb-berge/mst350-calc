@@ -31,7 +31,7 @@
   },
   {
     "id": "ghost",
-    "unit": "Unit 1",
+    "unit": "Unit 2",
     "title": "👻 It's a Ghostly Gathering Now!",
     "baseXP": 2,
     "variableXP": true,
@@ -43,7 +43,7 @@
   {
     "id": "engine",
     "unit": "Eternal",
-    "title": "🚒 I Am The Engine.",
+    "title": "🚒 I Am The Engine!",
     "baseXP": 3,
     "variableXP": false,
     "repeatable": false,
@@ -61,3 +61,4 @@
     "badges": { "collab": 0, "research": 1, "design": 0, "hero": 0 }
   }
 ]
+
